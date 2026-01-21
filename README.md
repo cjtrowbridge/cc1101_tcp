@@ -1,3 +1,5 @@
+License: [![License: CC BY-NC-SA 4.0](https://licensebuttons.net/l/by-nc-sa/4.0/80x15.png)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+
 # cc1101_tcp
 
 ##  A CC1101 `rtl_tcp`-Compatible RSSI Streaming for Ultra‑Low‑Cost VLBI‑Inspired Arrays — Design Document (v0.1)
@@ -12,7 +14,8 @@
 
 **Primary goal**
 
-* Implement a CC1101-backed network service that can **stream RSSI waterfall data in real time** into **existing SDR pipelines and software**, with minimal friction.
+* Implement a CC1101-backed network service that can **stream RSSI waterfall data in real time** into **exiLicense: [![License: CC BY-NC-SA 4.0](https://licensebuttons.net/l/by-nc-sa/4.0/80x15.png)](https://creativecommons.org/licenses/by-nc-sa/4.0/)
+* sting SDR pipelines and software**, with minimal friction.
 
 **Secondary goal**
 
