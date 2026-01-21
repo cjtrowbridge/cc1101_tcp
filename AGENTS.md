@@ -68,7 +68,6 @@ The `AGENTS.md` and `playbooks/` system is not static; it is a mechanism for **I
     2.  **Refine the Playbook**: Propose specific edits to playbooks to codify your new knowledge.
 
 **Proactive Proposals**: Do not wait for a separate session. As you encounter friction or finish a task, propose these documentation improvements immediately.
-## 6. System Architecture and Operation
 ## 5. Project Organization
 
 The repository is divided into primary domains, each serving a distinct phase of the system's lifecycle:
@@ -79,7 +78,13 @@ The repository is divided into primary domains, each serving a distinct phase of
         *   **Rationale**: Strict adherence to playbooks is required to avoid unintended consequences.
         *   **Constraint**: All playbooks must live in the root `/playbooks` directory.
 
-## 5. System Architecture and Operation
+*   **Reference Library (`/libraries`)**
+    *   Contains the canonical reference materials for the project's interfaces and hardware.
+    *   **Original Source**: `libraries/librtlsdr` contains the original `rtl_tcp` source code (as a submodule).
+    *   **Hardware Docs**: `libraries/cc1101_datasheet/cc1101.md` contains the transcribed CC1101 datasheet.
+    *   **Knowledge Base**: `libraries/rtl_sdr_wiki/index.md` contains the rtl-sdr wiki.
+
+## 6. System Architecture and Operation
 
 `cc1101_tcp` is a network service for CC1101 nodes.
 
