@@ -1,0 +1,1 @@
+Read AGENTS.md and follow all instructions exactly as though thery were here.
