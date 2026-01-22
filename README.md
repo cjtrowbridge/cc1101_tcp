@@ -65,6 +65,73 @@ A build is “successful” when it can do all of the following:
 
 ---
 
+## 0.4 Architectural Variance from "All-Seeing Eye"
+
+While this project utilizes the exact same physical hardware stack as the [All-Seeing Eye](https://github.com/cjtrowbridge/All-Seeing-Eye) project, the software architecture is fundamentally different:
+
+*   **All-Seeing Eye**: Performs distributed processing on the edge (the cluster analyzes the data).
+*   **cc1101_tcp**: Acts as a "dumb" TCP pipe. It streams raw RSSI/waterfall data from the edge device directly to a powerful workstation for processing. The "intelligence" lives in the software on your PC, not on the ESP32.
+
+### 0.5 Hardware Specification
+
+This project targets the **ESP32-S3-WROOM-1 N16R8** development board connected to a **CC1101** radio module. This configuration is physically identical to the "All-Seeing Eye" node.
+
+**Bill of Materials**
+*   **MCU**: ESP32-S3-WROOM-1 N16R8 (16MB Flash / 8MB PSRAM)
+*   **Radio**: TI CC1101 Module (3.3V)
+*   **Antenna**: Appropriate ISM-band antenna (915MHz/868MHz/433MHz)
+*   **Connection**: IPX MHF1 to SMA (if using external antenna)
+
+**Wiring Guide (ESP32-S3 N16R8)**
+The wiring utilizes the **Left Header** (FSPI) of the standard S3 dev board.
+
+| CC1101 Pin | Pin Name | Function | ESP32-S3 Pin | Location |
+| :--- | :--- | :--- | :--- | :--- |
+| 1 | **GND** | Ground | **GND** | Bottom Left |
+| 2 | **VCC** | Power | **3V3** | Top Left |
+| 3 | **GDO0** | Interrupt | **GPIO 4** | Left Side |
+| 4 | **CSN** | Chip Select | **GPIO 10** | Left Side |
+| 5 | **SCK** | SPI Clock | **GPIO 12** | Left Side |
+| 6 | **MOSI** | Master Out | **GPIO 11** | Left Side |
+| 7 | **MISO** | Master In | **GPIO 13** | Left Side |
+| 8 | **GDO2** | Interrupt 2 | **GPIO 5** | Left Side |
+
+### 0.6 Development & Build
+
+This project uses the **Arduino CLI** build pipeline, inherited from the All-Seeing Eye project, to manage the fleet.
+
+**Prerequisites**
+*   **Arduino CLI**: Must be installed and configured.
+*   **Python 3**: Required for various helpers.
+*   **PowerShell**: For the deployment script.
+
+**Fleet Deployment (OTA)**
+The primary method for deploying updates to the fleet is via the `upload_ota.ps1` script in the `firmware/` directory.
+
+1.  **Configure Hosts**: Create `firmware/known_hosts.txt` with the IP addresses of your nodes (one per line).
+2.  **Run Deployment**:
+    ```powershell
+    cd firmware
+    .\upload_ota.ps1
+    ```
+    This script will:
+    *   Compile the `cc1101_tcp` firmware.
+    *   Iterate through the `known_hosts.txt` list.
+    *   Upload the new binary to each node via OTA.
+
+**First-Time Setup (USB)**
+The `upload_ota.ps1` script assumes the devices are already running OTA-capable firmware. For a fresh device:
+1.  Open `firmware/cc1101_tcp` in the Arduino IDE.
+2.  Select **ESP32S3 Dev Module**.
+3.  Configure:
+    *   **USB CDC On Boot**: Enabled (if using native USB)
+    *   **Flash Size**: 16MB
+    *   **Partition Scheme**: 16MB Flash (3MB APP / 9MB FATFS)
+    *   **PSRAM**: OPI
+4.  Flash via USB.
+
+---
+
 ## 1. Background: mainstream `rtl_tcp`
 
 ### 1.1 What `rtl_tcp` is
@@ -132,71 +199,6 @@ If CC1101 nodes can present compatible interfaces (or a simple proxy can), we in
 
 * Classic `rtl_tcp` streams continuous bytes that are interpreted as interleaved I/Q (`I0,Q0,I1,Q1,...`).
 * Many clients expect an initial “device info” header (varies by implementation). For maximum compatibility we provide a safe header strategy (see §6).
-
----
-
-## 3. Hardware comparison: RTL-SDR vs CC1101 (why semantics differ)
-
-### 3.1 RTL-SDR class device (RTL2832U + tuner)
-
-* Provides **wideband complex baseband** (I/Q) to host.
-* A waterfall row is typically computed as an FFT snapshot over ~MHz of instantaneous bandwidth.
-* “Row time” is effectively the FFT window length, and the row is **simultaneous across bins** (to first order).
-
-### 3.2 CC1101 class device
-
-* Narrowband sub-GHz transceiver with internal modem.
-* Does **not** expose wideband I/Q.
-* Can provide:
-
-  * synthesizer tuning,
-  * channel filter bandwidth selection,
-  * RSSI power estimate,
-  * packet/FIFO modes,
-  * AGC/AFC behaviors.
-
-### 3.3 Key difference: simultaneity
-
-* RTL-SDR waterfall row: simultaneous snapshot across bins.
-* CC1101 waterfall row: **sequential sweep** over bins with non-zero sweep duration.
-
-This must be conveyed in the API: every row MUST include either (A) wall-clock timestamps (`TS_START_NS`,`TS_END_NS`) **or** (B) a sequence-based timing model (`ROW_SEQ`,`ROW_TIME_US_EST`), plus `SIMULTANEITY=SEQUENTIAL_SWEEP`.
-
----
-
-## 4. System architecture overview
-
-### 4.1 Two compatibility modes
-
-We implement two modes to balance “works everywhere” and “honest semantics.”
-
-**Mode A — IQ Emulation Stream (drop‑in waterfall compatibility)**
-
-* Stream *synthetic* I/Q whose FFT reproduces the RSSI waterfall.
-* Lets legacy FFT/waterfall apps work immediately.
-* Must be explicitly tagged as **emulated**.
-
-**Mode B — Framed WATERFALL_RSSI Stream (truthful + extensible)**
-
-* Stream framed waterfall rows with metadata.
-* Best for research, fusion, eventing, and correctness.
-* Requires a consumer (GNU Radio block, custom UI, or a proxy).
-
-### 4.2 Recommended deployment patterns
-
-**Pattern 1 (fastest path to reuse legacy apps)**
-
-```
-CC1101 Node (Mode A IQ emulation)  --->  legacy SDR app (waterfall)
-```
-
-**Pattern 2 (best practice: truthful protocol + optional proxy)**
-
-```
-CC1101 Node (Mode B frames)  --->  Proxy/Adapter  ---> legacy SDR app (IQ emulation)
-                                     |
-                                     +---> native consumers (GNU Radio / dashboards)
-```
 
 ---
 

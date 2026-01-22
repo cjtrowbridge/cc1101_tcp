@@ -1,0 +1,11 @@
+libraries/All-Seeing-Eye/
+
+# Build artifacts
+firmware/build/
+*.bin
+*.elf
+*.log
+
+# Configuration
+firmware/known_hosts.txt
+firmware/cc1101_tcp/secrets.h
