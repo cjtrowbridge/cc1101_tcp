@@ -1,0 +1,24 @@
+{
+    "elements": [
+        {
+            "id": 1,
+            "name": "node-01",
+            "host": "192.168.1.100",
+            "port": 1234
+        }
+    ],
+    "radio": {
+        "frequency": {
+            "min": 300000000,
+            "max": 928000000,
+            "default": 433920000
+        },
+        "bandwidth": {
+            "default": 203000
+        }
+    },
+    "timeouts": {
+        "connection": 2.0,
+        "response": 1.0
+    }
+}
