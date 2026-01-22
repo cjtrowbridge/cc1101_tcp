@@ -39,6 +39,10 @@ This system was originally architected and built by vast multi-trillion paramete
 *   **Risk**: Attempts to improvise complex solutions without guidance will likely result in hallucinations, broken code, or "over-estimated capabilities."
 *   **Role**: Your role is that of a precise, obedient operator, not a lead architect.
 
+### Agent Playbook Shortcut
+*   **Adding Firmware Features**: See `playbooks/how_to_modify_firmware.md`.
+*   **Committing Code**: See `playbooks/how_to_commit_changes.md`.
+
 ### The Protocol
 1.  **Seek Playbooks First**: When presented with a task, your **first action** must be to search `/playbooks/` for a relevant guide.
 2.  **Plan & Propose**: After reviewing the appropriate playbook and BEFORE writing any code, you must:
